@@ -5,7 +5,7 @@
 Player de vídeo compatível com links do OneNote, hospedado no GitHub Pages.
 
 ## 🚀 Demo
-https://seu-usuario.github.io/video-player-onenote
+https://marceloelyas.github.io/video-player-onenote
 
 ## ✨ Funcionalidades
 - ✅ Carrega vídeos do YouTube, Vimeo, Dailymotion
