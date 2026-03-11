@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Video Player - OneNote</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --link: #58a6ff;
+            --success: #238636;
+            --danger: #da3633;
+            --warning: #f0883e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .github-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: clamp(16px, 4vw, 24px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .header span {
+            background: var(--link);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge {
+            background: #238636;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: auto;
+        }
+
+        /* Player de Vídeo */
+        .player-section {
+            margin-bottom: 24px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        video, iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: #0d1117;
+            color: #8b949e;
+            gap: 16px;
+        }
+
+        .placeholder svg {
+            width: 64px;
+            height: 64px;
+            fill: #30363d;
+        }
+
+        /* Input e Botões */
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--link);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #21262d;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .btn-primary {
+            background: #238636;
+            border-color: #2ea043;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .btn-danger {
+            background: #da3633;
+            border-color: #f85149;
+        }
+
+        .btn-danger:hover {
+            background: #f85149;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+
+        .info-box h3 {
+            color: #fff;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box ul {
+            list-style: none;
+        }
+
+        .info-box li {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tag {
+            background: #21262d;
+            border: 1px solid var(--border);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+
+        .tag.onenote {
+            background: #80008020;
+            border-color: #800080;
+            color: #b791f7;
+        }
+
+        .status-message {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .status-success {
+            background: #23863620;
+            border: 1px solid #238636;
+            color: #7ee99b;
+            display: block;
+        }
+
+        .status-error {
+            background: #da363320;
+            border: 1px solid #da3633;
+            color: #ff7b72;
+            display: block;
+        }
+
+        .status-info {
+            background: #1f6feb20;
+            border: 1px solid #1f6feb;
+            color: #79c0ff;
+            display: block;
+        }
+
+        .footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: #8b949e;
+            font-size: 0.8rem;
+        }
+
+        .footer a {
+            color: var(--link);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* GitHub Corner */
+        .github-corner {
+            position: fixed;
+            top: 0;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- GitHub Corner SVG -->
+    <a href="https://github.com/seu-usuario/seu-repositorio" class="github-corner" aria-label="View source on GitHub">
+        <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#58a6ff; color:#0d1117; position: absolute; top: 0; right: 0; border: 0;" aria-hidden="true">
+            <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+            <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+            <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+        </svg>
+    </a>
+
+    <div class="container">
+        <div class="github-card">
+            <!-- Header -->
+            <div class="header">
+                <svg height="32" aria-hidden="true" viewBox="0 0 16 16" width="32" fill="#fff">
+                    <path d="M8 0c4.42 0 8 3.58 8 8 0 3.54-2.29 6.53-5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+                <h1>GitHub Video Player</h1>
+                <span>OneNote</span>
+                <div class="badge">GitHub Pages</div>
+            </div>
+
+            <!-- Player Section -->
+            <div class="player-section">
+                <div class="video-container" id="videoContainer">
+                    <video id="mainVideo" controls playsinline style="display: none;">
+                        Seu navegador não suporta vídeo HTML5.
+                    </video>
+                    <iframe id="iframeVideo" style="display: none;" allowfullscreen></iframe>
+                    <div id="placeholder" class="placeholder">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M18,15v4c0,0.55-0.45,1-1,1H5c-0.55,0-1-0.45-1-1V7c0-0.55,0.45-1,1-1h7v-2H5C3.9,4,3,4.9,3,6v12c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-4H18z M13,4v2h3.59l-8.46,8.46l1.41,1.41L18,7.41V11h2V4H13z"/>
+                        </svg>
+                        <p>Cole um link do OneNote para começar</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-group">
+                <input type="url" class="url-input" id="videoUrl" 
+                       placeholder="https://www.youtube.com/watch?v=... ou link do OneNote">
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="carregarVideo()">
+                        <svg height="16" viewBox="0 0 16 16" width="16" fill="#fff">
+                            <path d="M8 0v12.59L4.71 9.3 3.3 10.71 8 15.41l4.7-4.7-1.41-1.41L9 12.59V0H8z"/>
+                        </svg>
+                        Carregar Vídeo
+                    </button>
+                    <button class="btn" onclick="limparPlayer()">
+                        <svg height="16" viewBox="0 0 16 16" width="16" fill="#fff">
+                            <path d="M11.46 8l3.17-3.17-1.42-1.41L10.04 6.6 6.87 3.42 5.46 4.83 8.63 8l-3.17 3.17 1.41 1.41 3.17-3.17 3.17 3.17 1.42-1.41L11.46 8z"/>
+                        </svg>
+                        Limpar
+                    </button>
+                    <button class="btn" onclick="abrirNoGithub()">
+                        <svg height="16" viewBox="0 0 16 16" width="16" fill="#fff">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                        </svg>
+                        Ver no GitHub
+                    </button>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <h3>
+                    <svg height="16" viewBox="0 0 16 16" width="16" fill="#8b949e">
+                        <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM6.5 7.75v.5c0 .22.06.42.16.6l.91 1.52c.14.23.39.38.66.38h1.54a.75.75 0 0 0 0-1.5H8.94L8.2 7.44a.75.75 0 0 0-1.1-.2.75.75 0 0 0-.6.51zM8 5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path>
+                    </svg>
+                    Como usar com OneNote no GitHub
+                </h3>
+                <ul>
+                    <li>📌 No OneNote, clique com botão direito no vídeo</li>
+                    <li>🔗 Selecione "Copiar link" ou "Copiar endereço"</li>
+                    <li>📋 Cole no campo acima e clique em "Carregar"</li>
+                </ul>
+                
+                <div class="tag-list">
+                    <span class="tag">YouTube</span>
+                    <span class="tag">Vimeo</span>
+                    <span class="tag">Dailymotion</span>
+                    <span class="tag">TED</span>
+                    <span class="tag onenote">OneNote</span>
+                    <span class="tag">GitHub Pages</span>
+                </div>
+            </div>
+
+            <!-- Status Message -->
+            <div id="statusMessage" class="status-message"></div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>
+                    🔥 Hospedado no GitHub Pages | 
+                    <a href="#" onclick="carregarExemplo('youtube')">Testar YouTube</a> | 
+                    <a href="#" onclick="carregarExemplo('vimeo')">Testar Vimeo</a> | 
+                    <a href="#" onclick="carregarExemplo('onenote')">Testar OneNote</a>
+                </p>
+                <p style="margin-top: 8px;">
+                    ⚡ Links compatíveis com OneNote: YouTube, Vimeo, Dailymotion, TED, Sway, Office Mix
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos DOM
+        const videoElement = document.getElementById('mainVideo');
+        const iframeElement = document.getElementById('iframeVideo');
+        const placeholder = document.getElementById('placeholder');
+        const videoUrl = document.getElementById('videoUrl');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // Configuração
+        const GITHUB_REPO = 'seu-usuario/seu-repositorio'; // Altere para seu repositório
+
+        // Funções principais
+        function carregarVideo() {
+            const url = videoUrl.value.trim();
+            
+            if (!url) {
+                mostrarStatus('❌ Cole um link do OneNote primeiro', 'error');
+                return;
+            }
+
+            // Esconder tudo
+            videoElement.style.display = 'none';
+            iframeElement.style.display = 'none';
+            placeholder.style.display = 'none';
+
+            // Detectar tipo de link
+            if (isYoutubeUrl(url) || isVimeoUrl(url) || isDailymotionUrl(url)) {
+                carregarVideoOnline(url);
+            } else if (url.includes('onedrive.live.com') || url.includes('sharepoint.com')) {
+                mostrarStatus('⚠️ Links do OneDrive precisam ser convertidos para MP4 direto', 'info');
+                placeholder.style.display = 'flex';
+            } else {
+                mostrarStatus('❌ Link não suportado pelo OneNote no GitHub Pages', 'error');
+                placeholder.style.display = 'flex';
+            }
+        }
+
+        function isYoutubeUrl(url) {
+            return url.includes('youtube.com') || url.includes('youtu.be');
+        }
+
+        function isVimeoUrl(url) {
+            return url.includes('vimeo.com');
+        }
+
+        function isDailymotionUrl(url) {
+            return url.includes('dailymotion.com') || url.includes('dai.ly');
+        }
+
+        function carregarVideoOnline(url) {
+            let embedUrl = '';
+
+            if (isYoutubeUrl(url)) {
+                let videoId = '';
+                if (url.includes('youtube.com/watch')) {
+                    videoId = new URL(url).searchParams.get('v');
+                } else if (url.includes('youtu.be')) {
+                    videoId = url.split('/').pop();
+                }
+                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                mostrarStatus('🎬 YouTube carregado com sucesso!', 'success');
+            } else if (isVimeoUrl(url)) {
+                const videoId = url.split('/').pop();
+                embedUrl = `https://player.vimeo.com/video/${videoId}`;
+                mostrarStatus('🎥 Vimeo carregado com sucesso!', 'success');
+            } else if (isDailymotionUrl(url)) {
+                const videoId = url.split('/').pop();
+                embedUrl = `https://www.dailymotion.com/embed/video/${videoId}`;
+                mostrarStatus('📺 Dailymotion carregado!', 'success');
+            }
+
+            iframeElement.src = embedUrl;
+            iframeElement.style.display = 'block';
+            
+            // Salvar no localStorage do GitHub Pages
+            salvarNoCache(url);
+        }
+
+        function limparPlayer() {
+            videoElement.pause();
+            videoElement.src = '';
+            videoElement.style.display = 'none';
+            
+            iframeElement.src = '';
+            iframeElement.style.display = 'none';
+            
+            placeholder.style.display = 'flex';
+            videoUrl.value = '';
+            
+            mostrarStatus('🧹 Player limpo', 'success');
+        }
+
+        function mostrarStatus(mensagem, tipo) {
+            statusMessage.textContent = mensagem;
+            statusMessage.className = `status-message status-${tipo}`;
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 4000);
+        }
+
+        function salvarNoCache(url) {
+            try {
+                const historico = JSON.parse(localStorage.getItem('github-video-historico') || '[]');
+                historico.unshift({
+                    url: url,
+                    data: new Date().toISOString()
+                });
+                localStorage.setItem('github-video-historico', JSON.stringify(historico.slice(0, 10)));
+            } catch (e) {
+                console.log('Erro ao salvar cache:', e);
+            }
+        }
+
+        function abrirNoGithub() {
+            window.open(`https://github.com/${GITHUB_REPO}`, '_blank');
+        }
+
+        function carregarExemplo(tipo) {
+            const exemplos = {
+                youtube: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                vimeo: 'https://vimeo.com/148751763',
+                onenote: 'https://www.youtube.com/watch?v=ExemploOneNote'
+            };
+            
+            videoUrl.value = exemplos[tipo];
+            carregarVideo();
+        }
+
+        // Carregar último vídeo ao iniciar
+        window.addEventListener('load', () => {
+            const historico = JSON.parse(localStorage.getItem('github-video-historico') || '[]');
+            if (historico.length > 0) {
+                videoUrl.value = historico[0].url;
+                mostrarStatus('🔄 Último vídeo carregado do cache', 'info');
+            }
+        });
+    </script>
+</body>
+</html>
