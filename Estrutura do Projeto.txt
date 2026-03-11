@@ -1,0 +1,6 @@
+video-player-onenote/
+├── index.html          # Player principal
+├── README.md           # Documentação
+└── assets/            # (opcional) imagens, css extra
+    ├── css/
+    └── img/
